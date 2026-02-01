@@ -2,153 +2,196 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Typer | Eyyüp İfşat Global</title>
+    <title>Yazı Testi | Eyyüp İfşat Pro</title>
     <style>
-        :root { --bg: #ffffff; --card: #fdfdfd; --main: #8a2be2; --text: #1a1a1a; --sub: #888; --border: #ececec; --err: #ff4754; --succ: #2ecc71; }
-        body.dark-theme { --bg: #0d0d12; --card: #16161e; --main: #a155ff; --text: #eee; --sub: #555; --border: #222; --err: #ff6b81; --succ: #1dd1a1; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; transition: 0.3s; }
+        :root { 
+            --bg: #f8f9fa; --card: #ffffff; --main: #8a2be2; --text: #1a1a1a; 
+            --sub: #95a5a6; --border: #edf2f7; --err: #ff4754; --succ: #2ecc71; 
+            --glow: rgba(138, 43, 226, 0.2);
+        }
+        body.dark-theme { 
+            --bg: #0b0e14; --card: #151921; --main: #a155ff; --text: #f0f0f0; 
+            --sub: #636e72; --border: #2d3436; --err: #ff6b81; --succ: #1dd1a1; 
+        }
+        
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; overflow: hidden; transition: 0.4s; }
 
-        /* AUTH & SCREENS */
-        #auth-screen { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .auth-box { text-align: center; width: 400px; }
-        .input-group { background: #fff; padding: 35px; border-radius: 28px; box-shadow: 0 15px 50px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
-        .auth-box input { width: 100%; padding: 16px; margin: 8px 0; border: 1px solid #eee; border-radius: 14px; outline: none; background: #fcfcfc; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 16px; background: #1a1a1a; color: #fff; border: none; border-radius: 14px; cursor: pointer; font-weight: 600; font-size: 16px; }
+        /* GİRİŞ EKRANI */
+        #auth-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 10000; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .auth-card { background: var(--card); padding: 50px; border-radius: 35px; box-shadow: 0 25px 70px rgba(0,0,0,0.1); text-align: center; width: 400px; border: 1px solid var(--border); }
+        .auth-card h1 { font-size: 48px; letter-spacing: -3px; margin-bottom: 5px; color: var(--main); }
+        .auth-card input { width: 100%; padding: 18px; margin: 12px 0; border: 2px solid var(--border); border-radius: 15px; outline: none; font-size: 16px; background: var(--bg); transition: 0.3s; }
+        .auth-card input:focus { border-color: var(--main); box-shadow: 0 0 15px var(--glow); }
+        .btn-primary { width: 100%; padding: 18px; background: var(--main); color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: 800; font-size: 16px; margin-top: 15px; transition: 0.3s; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 25px var(--glow); }
+        .auth-nav { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
+        .auth-link { color: var(--sub); cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; }
+        .auth-link:hover { color: var(--main); }
 
-        /* RESULT & ANALYSIS */
-        #result-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 8000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
-        body.dark-theme #result-overlay { background: rgba(13,13,18,0.95); }
-        .result-card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid var(--border); text-align: center; width: 400px; }
+        /* HOŞ GELDİN YAZISI */
+        #welcome-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10vw; font-weight: 900; color: var(--main); opacity: 0; pointer-events: none; z-index: -1; transition: 2s; }
+        #welcome-overlay.active { opacity: 0.08; transform: translate(-50%, -58%); }
 
-        /* SIDEBAR & PROFILE */
-        .nav-icon { position: fixed; top: 30px; left: 30px; font-size: 24px; cursor: pointer; z-index: 1001; color: var(--sub); }
-        .side-panel { position: fixed; top: 0; left: -380px; width: 380px; height: 100%; background: var(--card); border-right: 1px solid var(--border); transition: 0.4s; z-index: 1000; padding: 40px 25px; box-sizing: border-box; }
-        .side-panel.open { left: 0; }
-        .profile-card { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
-        .pb-badge { background: var(--main); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 10px; display: inline-block; }
+        /* SOL PANEL */
+        .sidebar-trigger { position: fixed; top: 30px; left: 30px; font-size: 28px; cursor: pointer; z-index: 1001; color: var(--main); }
+        .sidebar { position: fixed; top: 0; left: -400px; width: 380px; height: 100%; background: var(--card); border-right: 1px solid var(--border); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; padding: 40px 30px; box-sizing: border-box; overflow-y: auto; }
+        .sidebar.open { left: 0; }
+        .profile-section { display: flex; align-items: center; gap: 20px; padding-bottom: 30px; border-bottom: 2px solid var(--border); margin-bottom: 30px; }
+        .avatar { width: 65px; height: 65px; background: var(--main); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 900; transform: rotate(-5deg); }
 
-        /* LANGUAGE SELECTOR (SAĞ ÜST) */
-        .lang-container { position: absolute; top: 0; right: 0; margin-bottom: 10px; }
-        .lang-select { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        /* KONTROL PANELİ */
+        .control-bar { display: flex; gap: 25px; margin-bottom: 25px; background: var(--card); padding: 15px 30px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .control-group { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 800; color: var(--sub); letter-spacing: 1px; }
+        .chip { padding: 6px 14px; border-radius: 10px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; }
+        .chip.active { background: var(--main); color: white; box-shadow: 0 5px 15px var(--glow); }
+        .chip:hover:not(.active) { background: var(--border); color: var(--text); }
 
-        /* GAME AREA */
-        .container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 15%; position: relative; }
-        #word-display { width: 100%; font-size: 38px; line-height: 1.6; height: 125px; overflow: hidden; display: flex; flex-wrap: wrap; text-align: left; }
-        .word { margin-right: 22px; color: var(--sub); border-bottom: 3px solid transparent; }
-        .word.active { color: var(--text); border-color: var(--main); }
+        /* ANA OYUN KUTUSU */
+        .arena-box { background: var(--card); border: 1px solid var(--border); border-radius: 35px; padding: 50px; width: 85%; max-width: 1000px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.03); }
+        #word-wall { font-size: 36px; line-height: 1.7; height: 125px; overflow: hidden; display: flex; flex-wrap: wrap; transition: 0.3s; }
+        .word { margin-right: 20px; color: var(--sub); border-bottom: 4px solid transparent; transition: 0.2s; }
+        .word.active { color: var(--text); border-color: var(--main); transform: scale(1.05); }
         .word.correct { color: var(--succ); }
         .word.wrong { color: var(--err); text-decoration: line-through; }
-        #typing-input { opacity: 0; position: absolute; }
-        
-        .stat-top { font-size: 24px; font-weight: 900; color: var(--main); margin-bottom: 20px; }
+
+        /* CANLI HARF TAKİBİ */
+        #live-tracker { height: 50px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: var(--main); margin-top: 30px; letter-spacing: 5px; text-transform: lowercase; }
+
+        /* ALT İSTATİSTİK */
+        .footer-stats { display: flex; gap: 60px; margin-top: 40px; font-size: 22px; font-weight: 900; }
+        .stat-item span { color: var(--main); font-size: 28px; }
+
+        #hidden-input { opacity: 0; position: absolute; pointer-events: none; }
+        .lang-switch { position: absolute; top: 30px; right: 40px; background: var(--bg); padding: 8px 18px; border-radius: 12px; font-weight: 900; cursor: pointer; border: 1px solid var(--border); font-size: 14px; }
     </style>
 </head>
 <body onclick="focusInput()">
 
+<div id="welcome-overlay">HOŞ GELDİN</div>
+
 <div id="auth-screen">
-    <div class="auth-box">
-        <h1>Neon Typer</h1>
-        <div class="input-group">
-            <input type="text" id="u-name" placeholder="Kullanıcı Adı">
-            <input type="email" id="u-email" placeholder="E-posta">
-            <button class="btn-main" onclick="login()">Oturuma Başla</button>
-        </div>
-    </div>
-</div>
-
-<div id="result-overlay">
-    <div class="result-card">
-        <h2 style="color:var(--main)">Oyun Bitti</h2>
-        <h1 id="res-score" style="font-size:48px; margin:10px 0;">0</h1>
-        <p id="res-stats" style="color:var(--sub)"></p>
-        <button class="btn-main" onclick="location.reload()">Tekrar Dene</button>
-    </div>
-</div>
-
-<div class="nav-icon" onclick="toggleSide()">☰</div>
-
-<div id="side-menu" class="side-panel">
-    <div class="profile-card">
-        <div style="display:flex; align-items:center; gap:15px;">
-            <div id="av-icon" style="width:50px; height:50px; background:var(--main); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">?</div>
-            <div>
-                <h2 id="av-name" style="margin:0; font-size:18px;">Eyyüp İfşat</h2>
-                <div class="pb-badge">Rekor: <span id="pb-val">0</span></div>
+    <div class="auth-card">
+        <h1>Yazı Testi</h1>
+        <p style="color:var(--sub); margin-bottom:20px;">Hız ve Doğruluk Arenası</p>
+        <div id="auth-inputs">
+            <input type="email" id="email-field" placeholder="E-posta Adresiniz">
+            <div id="reg-fields" style="display:none;">
+                <input type="text" id="name-field" placeholder="Kullanıcı Adınız">
             </div>
+            <button class="btn-primary" onclick="proceed()">GİRİŞ YAP</button>
+        </div>
+        <div class="auth-nav">
+            <span class="auth-link" onclick="document.getElementById('reg-fields').style.display='block';">✨ HESAP OLUŞTUR</span>
+            <span class="auth-link" onclick="guestIn()">👤 MİSAFİR OLARAK DENE</span>
         </div>
     </div>
-    <div style="padding:10px; cursor:pointer;" onclick="setTheme('dark')">🌙 Karanlık Mod</div>
-    <div style="padding:10px; cursor:pointer;" onclick="setTheme('light')">☀️ Aydınlık Mod</div>
 </div>
 
-<div class="container">
-    <div class="lang-container">
-        <select class="lang-select" id="lang-select" onchange="init()">
-            <option value="tr">🇹🇷 Türkçe (TDK)</option>
-            <option value="en">🇺🇸 English (Oxford)</option>
-        </select>
+<div class="sidebar-trigger" onclick="toggleSidebar()">☰</div>
+
+<div class="sidebar" id="main-sidebar">
+    <div class="profile-section">
+        <div class="avatar" id="p-avatar">?</div>
+        <div>
+            <h2 id="p-name" style="margin:0; font-size:22px;">Eyyüp İfşat</h2>
+            <div id="p-record" style="font-size:12px; color:var(--main); font-weight:bold; margin-top:5px;">Rekor: 0 WPM</div>
+        </div>
     </div>
-    
-    <div class="stat-top">
-        <span id="timer-ui">30</span>s | <span id="wpm-ui">0</span> WPM | <span id="score-ui">0</span> Pts
+
+    <div style="display:grid; gap:10px;">
+        <div class="control-group" style="padding:10px; cursor:pointer; color:var(--text)" onclick="alert('Lobiye bağlanılıyor...')">🌐 Multiplayer Arena</div>
+        <div class="control-group" style="padding:10px; cursor:pointer; color:var(--text)">🏆 Dünya Sıralaması</div>
+        <div class="control-group" style="padding:10px; cursor:pointer; color:var(--text)" onclick="alert('Henüz hata yapmadınız!')">❌ Hata Analizi</div>
+        <div class="control-group" style="padding:10px; cursor:pointer; color:var(--text)" onclick="setTheme('dark')">🌙 Karanlık Mod</div>
+        <div class="control-group" style="padding:10px; cursor:pointer; color:var(--text)" onclick="setTheme('light')">☀️ Aydınlık Mod</div>
+        <div class="control-group" style="padding:10px; cursor:pointer; color:var(--err); margin-top:20px;" onclick="location.reload()">🚪 Çıkış Yap</div>
     </div>
+</div>
+
+<div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
     
-    <div id="word-display"></div>
-    <input type="text" id="typing-input" autofocus autocomplete="off">
+    <div class="control-bar">
+        <div class="control-group">
+            KELİME: 
+            <span class="chip" onclick="updateWC(50, this)">50</span>
+            <span class="chip active" onclick="updateWC(200, this)">200</span>
+            <span class="chip" onclick="updateWC(500, this)">500</span>
+            <span class="chip" onclick="updateWC(1000, this)">1000</span>
+        </div>
+        <div style="width:2px; height:20px; background:var(--border);"></div>
+        <div class="control-group">
+            SÜRE: 
+            <span class="chip active" onclick="updateTime(15, this)">15s</span>
+            <span class="chip" onclick="updateTime(30, this)">30s</span>
+            <span class="chip" onclick="updateTime(60, this)">60s</span>
+        </div>
+    </div>
+
+    <div class="arena-box">
+        <div class="lang-switch" onclick="switchLang()" id="lang-btn">TÜRKÇE (TR)</div>
+        <div id="word-wall"></div>
+        <div id="live-tracker"></div>
+        <input type="text" id="hidden-input" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="footer-stats">
+        <div class="stat-item">KALAN: <span id="timer-txt">15</span>s</div>
+        <div class="stat-item">HIZ: <span id="wpm-txt">0</span> WPM</div>
+        <div class="stat-item">SKOR: <span id="score-txt">0</span></div>
+    </div>
 </div>
 
 <script>
-const pools = {
-    tr: ["bir", "ve", "bu", "da", "de", "için", "ne", "o", "kadar", "gibi", "daha", "var", "değil", "ben", "çok", "yok", "ama", "sonra", "ki", "sadece", "en", "kendi", "büyük", "başka", "böyle", "hiç", "yine", "yani", "tüm", "şöyle", "doğru", "çünkü", "biraz", "aslında", "ancak", "belki", "herkes", "insan", "gün", "yer", "yüz", "yol", "iş", "el", "göz", "dünya", "şey", "durum", "an", "gece", "kitap", "çocuk", "yaşam", "bilgi", "kelime"],
+const data = {
+    tr: ["bir", "ve", "bu", "da", "de", "için", "ne", "o", "kadar", "gibi", "daha", "var", "me", "değil", "ben", "çok", "yok", "ama", "sonra", "bile", "şimdi", "her", "zaman", "ki", "sadece", "en", "kendi", "büyük", "başka", "böyle", "hiç", "yine", "yani", "tüm", "şöyle", "doğru", "çünkü", "biraz", "aslında", "ancak", "belki", "herkes", "insan", "gün", "yer", "yüz", "yol", "iş", "el", "göz", "dünya", "şey", "durum", "an", "gece", "kitap", "çocuk", "yaşam", "bilgi", "kelime"],
     en: ["the", "be", "to", "of", "and", "a", "in", "that", "have", "i", "it", "for", "not", "on", "with", "he", "as", "you", "do", "at", "this", "but", "his", "by", "from", "they", "we", "say", "her", "she", "or", "an", "will", "my", "one", "all", "would", "there", "their", "what", "so", "up", "out", "if", "about", "who", "get", "which", "go", "me", "when", "make", "can", "like", "time", "no", "just", "him", "know", "take", "people", "into", "year", "your", "good", "some", "could", "them", "see", "other", "than", "then", "now", "look", "only", "come", "its", "over", "think", "also", "back", "after", "use", "two", "how", "our", "work", "first", "well", "way", "even", "new", "want", "because"]
 };
 
-let words = [], idx = 0, time = 30, score = 0, playing = false, interval, errors = [], correctCount = 0;
+let words = [], currentIdx = 0, currentLang = 'tr', maxW = 200, baseTime = 15, timeLeft = 15;
+let score = 0, correctW = 0, isRunning = false, clock;
 
-function login() {
-    const name = document.getElementById('u-name').value || "Eyyüp";
-    document.getElementById('av-name').innerText = name.toUpperCase();
-    document.getElementById('av-icon').innerText = name[0].toUpperCase();
-    document.getElementById('auth-screen').style.display = 'none';
-    
-    // Rekoru yükle
-    const pb = localStorage.getItem('eyyup_pb') || 0;
-    document.getElementById('pb-val').innerText = pb;
-    
-    init();
+function guestIn() { document.getElementById('name-field').value = "Misafir_" + Math.floor(Math.random()*999); proceed(); }
+
+function proceed() {
+    const name = document.getElementById('name-field').value || "Eyyüp";
+    document.getElementById('p-name').innerText = name.toUpperCase();
+    document.getElementById('p-avatar').innerText = name[0].toUpperCase();
+    document.getElementById('welcome-overlay').innerText = "HOŞ GELDİN " + name.toUpperCase();
+    document.getElementById('welcome-overlay').classList.add('active');
+    document.getElementById('auth-screen').style.opacity = '0';
+    setTimeout(() => { document.getElementById('auth-screen').style.display = 'none'; initGame(); }, 600);
 }
 
-function init() {
-    words = []; idx = 0; score = 0; playing = false; correctCount = 0; time = 30;
-    const lang = document.getElementById('lang-select').value;
-    const pool = pools[lang];
+function initGame() {
+    words = []; currentIdx = 0; score = 0; correctW = 0; isRunning = false; timeLeft = baseTime;
+    clearInterval(clock);
+    document.getElementById('timer-txt').innerText = timeLeft;
+    document.getElementById('score-txt').innerText = "0";
+    document.getElementById('wpm-txt').innerText = "0";
     
-    for(let i=0; i < 200; i++) words.push(pool[Math.floor(Math.random() * pool.length)]);
+    const pool = data[currentLang];
+    for(let i=0; i < maxW; i++) words.push(pool[Math.floor(Math.random() * pool.length)]);
     
-    document.getElementById('word-display').innerHTML = words.map((w,i) => `<span class="word" id="w-${i}">${w}</span>`).join('');
-    document.getElementById('w-0').classList.add('active');
-    document.getElementById('score-ui').innerText = "0";
-    document.getElementById('timer-ui').innerText = "30";
-    document.getElementById('wpm-ui').innerText = "0";
+    document.getElementById('word-wall').innerHTML = words.map((w,i) => `<span class="word" id="word-${i}">${w}</span>`).join('');
+    document.getElementById('word-0').classList.add('active');
 }
 
-document.getElementById('typing-input').addEventListener('input', (e) => {
-    if(!playing) {
-        playing = true;
-        interval = setInterval(() => {
-            time--;
-            document.getElementById('timer-ui').innerText = time;
-            // WPM Hesaplama
-            const wpm = Math.round((correctCount / ((30 - time) / 60)));
-            document.getElementById('wpm-ui').innerText = isFinite(wpm) ? wpm : 0;
-            
-            if(time <= 0) finish();
+document.getElementById('hidden-input').addEventListener('input', (e) => {
+    if(!isRunning) {
+        isRunning = true;
+        clock = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer-txt').innerText = timeLeft;
+            const wpm = Math.round((correctW / ((baseTime - timeLeft) / 60)));
+            document.getElementById('wpm-txt').innerText = isFinite(wpm) ? wpm : 0;
+            if(timeLeft <= 0) { clearInterval(clock); alert("Oyun Bitti! Skor: " + score); initGame(); }
         }, 1000);
     }
-    
+
     const val = e.target.value.trim();
-    const target = words[idx];
-    const el = document.getElementById(`w-${idx}`);
+    document.getElementById('live-tracker').innerText = val;
+    const target = words[currentIdx];
+    const el = document.getElementById(`word-${currentIdx}`);
 
     if(!target.startsWith(val)) el.classList.add('wrong');
     else el.classList.remove('wrong');
@@ -157,36 +200,37 @@ document.getElementById('typing-input').addEventListener('input', (e) => {
         if(val === target) {
             el.className = 'word correct';
             score += target.length * 10;
-            correctCount++;
-        } else {
-            el.className = 'word wrong';
-            errors.push({t: target, y: val});
-        }
-        idx++; e.target.value = "";
-        document.getElementById(`w-${idx}`).classList.add('active');
-        document.getElementById('score-ui').innerText = score;
-        if(idx % 6 === 0) document.getElementById('word-display').scrollTop += 60;
+            correctW++;
+        } else el.className = 'word wrong';
+        
+        currentIdx++; e.target.value = "";
+        document.getElementById('live-tracker').innerText = "";
+        if(currentIdx < maxW) document.getElementById(`word-${currentIdx}`).classList.add('active');
+        document.getElementById('score-txt').innerText = score;
+        if(currentIdx % 5 === 0) document.getElementById('word-wall').scrollTop += 62;
     }
 });
 
-function finish() {
-    clearInterval(interval);
-    document.getElementById('result-overlay').style.display = 'flex';
-    document.getElementById('res-score').innerText = score;
-    document.getElementById('res-stats').innerText = `Doğru: ${correctCount} | Yanlış: ${idx - correctCount}`;
-    
-    // Kişisel Rekor Kontrolü
-    const currentPB = localStorage.getItem('eyyup_pb') || 0;
-    if(score > currentPB) {
-        localStorage.setItem('eyyup_pb', score);
-        document.getElementById('pb-val').innerText = score;
-        alert("YENİ REKOR!");
-    }
+function updateWC(n, el) { 
+    maxW = n; 
+    document.querySelectorAll('.control-group:first-child .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    initGame(); 
 }
-
-function toggleSide() { document.getElementById('side-menu').classList.toggle('open'); }
-function setTheme(t) { document.body.className = t === 'light' ? '' : 'dark-theme'; }
-function focusInput() { document.getElementById('typing-input').focus(); }
+function updateTime(n, el) { 
+    baseTime = n; timeLeft = n; 
+    document.querySelectorAll('.control-group:last-child .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    initGame(); 
+}
+function switchLang() {
+    currentLang = currentLang === 'tr' ? 'en' : 'tr';
+    document.getElementById('lang-btn').innerText = currentLang === 'tr' ? 'TÜRKÇE (TR)' : 'ENGLISH (EN)';
+    initGame();
+}
+function toggleSidebar() { document.getElementById('main-sidebar').classList.toggle('open'); }
+function setTheme(t) { document.body.className = t === 'dark' ? 'dark-theme' : ''; }
+function focusInput() { document.getElementById('hidden-input').focus(); }
 </script>
 </body>
 </html>
