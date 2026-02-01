@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Neon Typer | Eyyüp İfşat Edition</title>
+    <style>
+        :root { --bg: #050508; --main: #8a2be2; --correct: #ffffff; --wrong: #ff4754; --sub: #333; }
+        body { background: var(--bg); color: #646669; font-family: 'JetBrains Mono', monospace; margin: 0; overflow: hidden; transition: 0.5s; }
+
+        /* Giriş Paneli */
+        #auth-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .auth-box { background: #0c0c12; padding: 40px; border-radius: 15px; border: 1px solid #222; text-align: center; width: 350px; }
+        .auth-box input { width: 100%; padding: 12px; margin: 10px 0; background: #050508; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
+        .primary-btn { width: 100%; padding: 12px; background: var(--main); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+
+        /* Hamburger Menüler */
+        .nav-btn { position: fixed; top: 30px; font-size: 28px; color: #444; cursor: pointer; z-index: 1001; transition: 0.3s; }
+        .nav-btn:hover { color: var(--main); }
+        #left-trigger { left: 40px; }
+        #right-trigger { right: 40px; }
+
+        .side-menu { position: fixed; top: 0; width: 320px; height: 100%; background: #08080c; border-left: 1px solid #111; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; padding: 100px 30px; box-sizing: border-box; }
+        #left-menu { left: -320px; border-right: 1px solid #111; border-left: none; }
+        #right-menu { right: -320px; }
+        .side-menu.open { transform: translateX(320px); }
+        #right-menu.open { transform: translateX(-320px); }
+
+        /* Oyun Alanı */
+        .container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 5%; }
+        #word-display { 
+            width: 95%; font-size: 34px; line-height: 1.8; text-align: left; 
+            height: 130px; overflow: hidden; display: flex; flex-wrap: wrap; 
+        }
+        .word { margin-right: 20px; color: var(--sub); transition: 0.3s; }
+        .word.active { color: #d1d0c5; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        /* Midnight Efekti */
+        body.midnight .word:not(.active) { opacity: 0.05; filter: blur(2px); }
+        .word.correct { color: var(--correct) !important; opacity: 1 !important; filter: none !important; }
+        .word.wrong { color: var(--wrong) !important; opacity: 1 !important; filter: none !important; }
+
+        /* İstatistikler */
+        .stats-bar { font-size: 24px; color: var(--main); margin-bottom: 30px; letter-spacing: 2px; }
+        .quick-settings { display: flex; gap: 20px; margin-top: 50px; background: rgba(255,255,255,0.02); padding: 12px 30px; border-radius: 50px; font-size: 14px; }
+        .opt { cursor: pointer; transition: 0.2s; }
+        .opt.active { color: var(--main); font-weight: bold; }
+
+        /* Sonuç Ekranı */
+        #result-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20000; }
+        .card { background: #0c0c12; padding: 50px; border-radius: 24px; border: 1px solid var(--main); text-align: center; min-width: 400px; }
+
+        footer { position: fixed; bottom: 25px; width: 100%; text-align: center; font-size: 13px; letter-spacing: 1px; }
+        #typing-input { opacity: 0; position: absolute; pointer-events: none; }
+    </style>
+</head>
+<body onclick="document.getElementById('typing-input').focus()">
+
+<div id="auth-screen">
+    <div class="auth-box">
+        <h1 style="color:white; margin-bottom:10px;">Neon Typer</h1>
+        <p style="font-size:12px; margin-bottom:30px;">Professional Typing Suite</p>
+        <input type="email" id="user-email" placeholder="E-posta Adresiniz">
+        <button class="primary-btn" onclick="login()">Kayıt Ol / Giriş Yap</button>
+        <button onclick="login('Eyyüp')" style="background:none; border:none; color:#444; cursor:pointer; margin-top:20px; text-decoration:underline;">Misafir Olarak Devam Et</button>
+    </div>
+</div>
+
+<div id="result-screen">
+    <div class="card">
+        <h2 style="color:var(--main)">PERFORMANS RAPORU</h2>
+        <div style="font-size: 40px; margin: 20px 0;" id="res-score">0</div>
+        <p>Puan Kazandın!</p>
+        <div style="color:var(--sub); margin-bottom:30px;">Hız: <span id="res-wpm">0</span> WPM</div>
+        <button class="primary-btn" onclick="share()">SKORU PAYLAŞ 🔗</button>
+        <button class="primary-btn" style="background:#222; margin-top:10px;" onclick="location.reload()">TEKRAR DENE</button>
+    </div>
+</div>
+
+<div id="left-trigger" class="nav-btn" onclick="toggle('left-menu')">☰</div>
+<div id="right-trigger" class="nav-btn" onclick="toggle('right-menu')">☰</div>
+
+<div id="left-menu" class="side-menu">
+    <h3 style="color:var(--main)">OYUN MODLARI</h3>
+    <div class="opt" style="margin:15px 0" onclick="setMode('midnight')">🌙 Gece Yarısı (Focus)</div>
+    <div class="opt" style="margin:15px 0" onclick="setMode('classic')">☀️ Standart Mod</div>
+</div>
+
+<div id="right-menu" class="side-menu">
+    <h3 style="color:var(--main)">SIRALAMA</h3>
+    <div style="font-size:14px; line-height:2;">
+        1. <span style="color:white">Eyyüp İfşat</span> - 5400 Puan<br>
+        2. Gemini_Flash - 4100 Puan<br>
+        3. Klavye_Dostu - 3200 Puan
+    </div>
+</div>
+
+<div class="container">
+    <div class="stats-bar">
+        <span id="timer-val">60</span>s <span style="color:#222; margin:0 15px;">|</span> <span id="live-score">0000</span>
+    </div>
+
+    <div id="word-display"></div>
+    <input type="text" id="typing-input" autofocus autocomplete="off">
+
+    <div class="quick-settings">
+        <span class="opt active" onclick="updateSüre(30, this)">30s</span>
+        <span class="opt" onclick="updateSüre(60, this)">60s</span>
+        <div style="width:1px; background:#222"></div>
+        <span class="opt active" onclick="updateAdet(50, this)">50 Kelime</span>
+        <span class="opt" onclick="updateAdet(200, this)">200 Kelime</span>
+        <span class="opt" onclick="updateAdet(500, this)">500 Kelime</span>
+    </div>
+</div>
+
+<footer>
+    Developed by <span style="color:var(--main); font-weight:bold;">Eyyüp İfşat</span> & Gemini 🚀
+</footer>
+
+<script>
+const pool = ["teknoloji", "arayüz", "mükemmelleştirmek", "yazılım", "performans", "disiplin", "strateji", "odaklanma", "algoritma", "verimlilik", "gelecek", "donanım", "vizyon", "zeka", "kritik"];
+let words = [], idx = 0, timer = 60, score = 0, isPlaying = false, interval;
+let currentSüre = 30;
+
+function login(name) {
+    document.getElementById('auth-screen').style.display = 'none';
+    init();
+}
+
+function init() {
+    words = [];
+    const count = parseInt(document.querySelector('.opt.active').innerText) || 50;
+    for(let i=0; i<count; i++) words.push(pool[Math.floor(Math.random() * pool.length)]);
+    document.getElementById('word-display').innerHTML = words.map((w, i) => `<span class="word" id="w-${i}">${w}</span>`).join('');
+    document.getElementById('w-0').classList.add('active');
+}
+
+const input = document.getElementById('typing-input');
+input.addEventListener('input', (e) => {
+    if(!isPlaying) start();
+    const typed = e.target.value.trim();
+    const target = words[idx];
+    const el = document.getElementById(`w-${idx}`);
+
+    if(!target.startsWith(typed)) el.classList.add('wrong');
+    else el.classList.remove('wrong');
+
+    if(e.target.value.endsWith(' ')) {
+        if(typed === target) {
+            el.className = 'word correct';
+            score += (target.length * 10); // Harf bazlı dinamik puan
+        } else {
+            el.className = 'word wrong';
+        }
+        idx++;
+        e.target.value = "";
+        document.getElementById(`w-${idx}`).classList.add('active');
+        document.getElementById('live-score').innerText = score.toString().padStart(4, '0');
+        
+        if(idx % 7 === 0) document.getElementById('word-display').scrollTop += 60;
+    }
+});
+
+function start() {
+    isPlaying = true;
+    timer = currentSüre;
+    interval = setInterval(() => {
+        timer--;
+        document.getElementById('timer-val').innerText = timer;
+        if(timer <= 0) finish();
+    }, 1000);
+}
+
+function finish() {
+    clearInterval(interval);
+    document.getElementById('result-screen').style.display = 'flex';
+    document.getElementById('res-score').innerText = score;
+    document.getElementById('res-wpm').innerText = Math.round((score/10)/5);
+}
+
+function share() {
+    const txt = `Neon Typer Skorun: ${score} Puan! Geliştiren: Eyyüp İfşat.`;
+    navigator.clipboard.writeText(txt);
+    alert("Skor kopyalandı!");
+}
+
+function toggle(id) { document.getElementById(id).classList.toggle('open'); }
+function setMode(m) { 
+    m === 'midnight' ? document.body.classList.add('midnight') : document.body.classList.remove('midnight');
+    toggle('left-menu');
+}
+function updateSüre(s, el) { currentSüre = s; document.getElementById('timer-val').innerText = s; act(el); }
+function updateAdet(c, el) { act(el); init(); }
+function act(el) { el.parentElement.querySelectorAll('.opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); }
+</script>
+</body>
+</html>
